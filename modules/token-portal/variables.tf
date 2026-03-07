@@ -41,3 +41,16 @@ variable "google_idp_id" {
   description = "CF Access Google identity provider ID"
   type        = string
 }
+
+variable "internal_access_client_id" {
+  description = "CF Access service token client ID for proxying to internal services"
+  type        = string
+  default     = ""
+}
+
+variable "internal_access_client_secret" {
+  description = "CF Access service token client secret for proxying to internal services"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

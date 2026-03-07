@@ -47,4 +47,10 @@ module "tunnel" {
     "grafana-int",
     "argocd-int",
   ]
+
+  # Lock these behind CF Access — only portal worker can reach them
+  internal_hostnames = [
+    "grafana-int.REDACTED_DOMAIN",
+    "argocd-int.REDACTED_DOMAIN",
+  ]
 }

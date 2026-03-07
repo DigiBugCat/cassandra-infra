@@ -63,3 +63,9 @@ variable "skip_waf" {
   type        = bool
   default     = true
 }
+
+variable "internal_hostnames" {
+  description = "Hostnames to protect with CF Access (only reachable via service token)"
+  type        = list(string)
+  default     = []
+}

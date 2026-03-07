@@ -127,3 +127,43 @@ resource "cloudflare_zero_trust_access_policy" "service_token" {
     service_token = [cloudflare_zero_trust_access_service_token.this[0].id]
   }
 }
+
+# --- CF Access: protect internal hostnames (e.g. grafana-int, argocd-int) ---
+
+locals {
+  create_internal_access = length(var.internal_hostnames) > 0
+}
+
+# Access application per internal hostname — blocks all public access
+resource "cloudflare_zero_trust_access_application" "internal" {
+  for_each = toset(var.internal_hostnames)
+
+  zone_id                   = var.zone_id
+  name                      = each.value
+  domain                    = each.value
+  type                      = "self_hosted"
+  session_duration          = "24h"
+  auto_redirect_to_identity = false
+}
+
+# Shared service token for the portal worker to reach internal services
+resource "cloudflare_zero_trust_access_service_token" "internal" {
+  count      = local.create_internal_access ? 1 : 0
+  account_id = var.account_id
+  name       = "${var.tunnel_name}-internal-proxy"
+}
+
+# Allow the service token through each internal Access app
+resource "cloudflare_zero_trust_access_policy" "internal" {
+  for_each = toset(var.internal_hostnames)
+
+  application_id = cloudflare_zero_trust_access_application.internal[each.key].id
+  zone_id        = var.zone_id
+  name           = "Internal proxy access"
+  precedence     = 1
+  decision       = "non_identity"
+
+  include {
+    service_token = [cloudflare_zero_trust_access_service_token.internal[0].id]
+  }
+}

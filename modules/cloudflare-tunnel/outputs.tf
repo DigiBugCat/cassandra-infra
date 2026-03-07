@@ -29,3 +29,14 @@ output "access_app_id" {
   description = "CF Access application ID"
   value       = var.create_access_app ? cloudflare_zero_trust_access_application.this[0].id : ""
 }
+
+output "internal_access_client_id" {
+  description = "Service token client ID for internal proxy access"
+  value       = local.create_internal_access ? cloudflare_zero_trust_access_service_token.internal[0].client_id : ""
+}
+
+output "internal_access_client_secret" {
+  description = "Service token client secret for internal proxy access"
+  value       = local.create_internal_access ? cloudflare_zero_trust_access_service_token.internal[0].client_secret : ""
+  sensitive   = true
+}

@@ -57,12 +57,12 @@ async function handleRequest(request, env) {
       const { name } = await request.json();
       if (!name) return jsonResponse({ error: "name is required" }, 400);
       const data = await createTenant(env, name);
-      // The orchestrator returns { tenant, apiKey } where apiKey is shown once
+      // Orchestrator returns { id, name, namespace, api_key, max_sessions }
       return jsonResponse({
-        id: data.tenant.id,
-        name: data.tenant.name,
-        api_key: data.apiKey,
-        created_at: data.tenant.createdAt,
+        id: data.id,
+        name: data.name,
+        api_key: data.api_key,
+        created_at: new Date().toISOString(),
       });
     } catch (e) {
       return jsonResponse({ error: e.message }, 500);
@@ -98,6 +98,11 @@ async function proxyToInternal(request, env, subdomain, prefix) {
   const target = `https://${subdomain}.REDACTED_DOMAIN${path}${url.search}`;
   const headers = new Headers(request.headers);
   headers.delete("host");
+  // Authenticate to CF Access on internal hostnames
+  if (env.INTERNAL_ACCESS_CLIENT_ID) {
+    headers.set("CF-Access-Client-Id", env.INTERNAL_ACCESS_CLIENT_ID);
+    headers.set("CF-Access-Client-Secret", env.INTERNAL_ACCESS_CLIENT_SECRET);
+  }
   return fetch(target, { method: request.method, headers, body: request.body });
 }
 
@@ -281,10 +286,10 @@ function renderTokens(tenants){
   document.getElementById('tokens-count').innerHTML='<strong>'+tenants.length+'</strong> API keys';
 
   const recent=tenants.slice(0,4);
-  document.getElementById('dash-tokens-body').innerHTML=recent.length?recent.map(t=>'<tr><td style="font-weight:500">'+esc(t.name)+'</td><td><code class="mono">'+esc(t.namespace)+'</code></td><td>'+t.maxSessions+'</td><td style="color:var(--text-3)">'+fmtDate(t.createdAt)+'</td></tr>').join(''):'<tr><td colspan="4" class="empty-state">No API keys yet</td></tr>';
+  document.getElementById('dash-tokens-body').innerHTML=recent.length?recent.map(t=>'<tr><td style="font-weight:500">'+esc(t.name)+'</td><td><code class="mono">'+esc(t.namespace)+'</code></td><td>'+t.max_sessions+'</td><td style="color:var(--text-3)">'+fmtDate(t.created_at)+'</td></tr>').join(''):'<tr><td colspan="4" class="empty-state">No API keys yet</td></tr>';
 
   const rows=tenants.map(t=>{
-    return '<tr><td style="font-weight:500">'+esc(t.name)+'</td><td><code class="mono">'+esc(t.namespace)+'</code></td><td>'+t.maxSessions+'</td><td style="color:var(--text-3)">'+fmtDate(t.createdAt)+'</td><td style="text-align:right"><button class="btn-red-sm" onclick="deleteTenant(\\''+t.id+'\\',\\''+esc(t.name)+'\\')">Delete</button></td></tr>';
+    return '<tr><td style="font-weight:500">'+esc(t.name)+'</td><td><code class="mono">'+esc(t.namespace)+'</code></td><td>'+t.max_sessions+'</td><td style="color:var(--text-3)">'+fmtDate(t.created_at)+'</td><td style="text-align:right"><button class="btn-red-sm" onclick="deleteTenant(\\''+t.id+'\\',\\''+esc(t.name)+'\\')">Delete</button></td></tr>';
   });
   document.getElementById('tokens-body').innerHTML=rows.length?rows.join(''):'<tr><td colspan="5" class="empty-state">No API keys yet. Create one to get started.</td></tr>';
 }

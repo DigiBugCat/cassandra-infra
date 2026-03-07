@@ -32,3 +32,16 @@ variable "allowed_emails" {
   type        = list(string)
   default     = ["REDACTED_EMAIL"]
 }
+
+variable "internal_access_client_id" {
+  description = "CF Access service token client ID for internal proxy"
+  type        = string
+  default     = ""
+}
+
+variable "internal_access_client_secret" {
+  description = "CF Access service token client secret for internal proxy"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
