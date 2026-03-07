@@ -138,9 +138,8 @@ async function proxyToTunnel(request, env, prefix, originEnvKey) {
     return new Response("Proxy origin not configured", { status: 502 });
   }
 
-  // Strip the prefix and forward to the internal tunnel hostname
-  const path = url.pathname.slice(prefix.length - 1); // keep leading /
-  const target = origin + path + url.search;
+  // Forward the full path (including prefix) — services handle their own sub-path
+  const target = origin + url.pathname + url.search;
 
   const headers = new Headers(request.headers);
   headers.set("Host", new URL(origin).hostname);
