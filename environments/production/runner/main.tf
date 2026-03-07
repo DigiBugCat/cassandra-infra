@@ -24,7 +24,7 @@ module "tunnel" {
   account_id    = var.cloudflare_account_id
   zone_id       = var.zone_id
   domain        = "REDACTED_DOMAIN"
-  subdomain     = "runner"
+  subdomain     = "claude-runner"
   tunnel_name   = "cassandra-runner"
   tunnel_secret = var.tunnel_secret
   origin_url    = "http://localhost:8080"
