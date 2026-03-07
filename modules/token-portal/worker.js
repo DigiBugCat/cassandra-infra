@@ -268,6 +268,10 @@ body{font-family:'Sora',sans-serif;background:var(--bg-0);color:var(--text-0);mi
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty-state{text-align:center;padding:40px;color:var(--text-3);font-size:12.5px}
+.cred-box{position:relative}
+.copy-btn{position:absolute;top:10px;right:10px;background:var(--bg-4);border:1px solid var(--border);border-radius:5px;padding:5px 7px;cursor:pointer;color:var(--text-2);transition:all .12s;display:flex;align-items:center;gap:4px;font-family:'Sora',sans-serif;font-size:10px}
+.copy-btn:hover{background:var(--purple-soft);color:var(--purple);border-color:var(--purple)}
+.copy-btn.copied{background:var(--green-soft);color:var(--green);border-color:transparent}
 </style>
 </head>
 <body>
@@ -322,8 +326,8 @@ body{font-family:'Sora',sans-serif;background:var(--bg-0);color:var(--text-0);mi
   <div class="modal" id="modal-result" style="display:none">
     <h3>Token Created ✓</h3>
     <div class="warn-banner">⚠ Copy now — the secret won't be shown again.</div>
-    <div class="cred-box"><span class="key">Client ID</span><span id="new-client-id"></span></div>
-    <div class="cred-box"><span class="key">Client Secret</span><span id="new-client-secret"></span></div>
+    <div class="cred-box"><span class="key">Client ID</span><span id="new-client-id"></span><button class="copy-btn" onclick="copyText('new-client-id',this)" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+    <div class="cred-box"><span class="key">Client Secret</span><span id="new-client-secret"></span><button class="copy-btn" onclick="copyText('new-client-secret',this)" title="Copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
     <div class="modal-footer"><button class="btn btn-accent" onclick="hideModal(); loadTokens();">Done</button></div>
   </div>
 </div>
@@ -372,6 +376,18 @@ function renderTokens(tokens){
 
 function fmtDate(d){if(!d)return'-';const dt=new Date(d);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function copyText(elId,btn){
+  const text=document.getElementById(elId).textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.classList.add('copied');
+    btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied';
+    setTimeout(()=>{
+      btn.classList.remove('copied');
+      btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+    },2000);
+  });
+}
 
 // ── Create ──
 function showCreateModal(){document.getElementById('modal').classList.add('active');document.getElementById('modal-create').style.display='block';document.getElementById('modal-result').style.display='none';document.getElementById('token-name').value='';document.getElementById('token-name').focus()}
