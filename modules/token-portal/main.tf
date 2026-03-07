@@ -33,6 +33,16 @@ resource "cloudflare_workers_script" "portal" {
     name = "RUNNER_ACCESS_POLICY_ID"
     text = var.runner_access_policy_id
   }
+
+  plain_text_binding {
+    name = "GRAFANA_ORIGIN"
+    text = "https://grafana-int.${var.domain}"
+  }
+
+  plain_text_binding {
+    name = "ARGOCD_ORIGIN"
+    text = "https://argocd-int.${var.domain}"
+  }
 }
 
 # Custom domain route for the Worker

@@ -18,43 +18,17 @@ provider "cloudflare" {
   email   = var.cloudflare_email
 }
 
-# Portal tunnel — routes portal.REDACTED_DOMAIN to the portal nginx pod
-module "tunnel" {
-  source = "../../../modules/cloudflare-tunnel"
+module "portal" {
+  source = "../../../modules/token-portal"
 
-  account_id    = var.cloudflare_account_id
-  zone_id       = var.zone_id
-  domain        = "REDACTED_DOMAIN"
-  subdomain     = "portal"
-  tunnel_name   = "cassandra-portal"
-  tunnel_secret = var.tunnel_secret
-  origin_url    = "http://portal.portal.svc.cluster.local:80"
-
-  # No service-token-based Access — portal uses Google OAuth (below)
-  create_access_app = false
-  skip_waf          = false
-}
-
-# CF Access application — protect portal with Google OAuth
-resource "cloudflare_zero_trust_access_application" "portal" {
-  zone_id                   = var.zone_id
-  name                      = "cassandra-portal"
-  domain                    = "portal.REDACTED_DOMAIN"
-  type                      = "self_hosted"
-  session_duration          = "24h"
-  auto_redirect_to_identity = true
-  allowed_idps              = [var.google_idp_id]
-}
-
-# Access policy — allow specific Google emails
-resource "cloudflare_zero_trust_access_policy" "google_email" {
-  application_id = cloudflare_zero_trust_access_application.portal.id
-  zone_id        = var.zone_id
-  name           = "Allowed Google users"
-  precedence     = 1
-  decision       = "allow"
-
-  include {
-    email = var.allowed_emails
-  }
+  account_id              = var.cloudflare_account_id
+  zone_id                 = var.zone_id
+  domain                  = "REDACTED_DOMAIN"
+  subdomain               = "portal"
+  worker_name             = "cassandra-portal"
+  cf_api_token            = var.cf_api_token
+  runner_access_app_id    = var.runner_access_app_id
+  runner_access_policy_id = var.runner_access_policy_id
+  allowed_emails          = var.allowed_emails
+  google_idp_id           = "REDACTED_IDP_ID"
 }

@@ -124,10 +124,50 @@ function extractTokenIds(policy) {
   return ids;
 }
 
+// ── Proxy routes (tunnel-backed services) ──
+
+const PROXY_ROUTES = {
+  "/grafana/": "GRAFANA_ORIGIN",
+  "/argocd/": "ARGOCD_ORIGIN",
+};
+
+async function proxyToTunnel(request, env, prefix, originEnvKey) {
+  const url = new URL(request.url);
+  const origin = env[originEnvKey];
+  if (!origin) {
+    return new Response("Proxy origin not configured", { status: 502 });
+  }
+
+  // Strip the prefix and forward to the internal tunnel hostname
+  const path = url.pathname.slice(prefix.length - 1); // keep leading /
+  const target = origin + path + url.search;
+
+  const headers = new Headers(request.headers);
+  headers.set("Host", new URL(origin).hostname);
+
+  return fetch(target, {
+    method: request.method,
+    headers,
+    body: request.body,
+    redirect: "manual",
+  });
+}
+
 // ── Router ──
 
 async function handleRequest(request, env) {
   const url = new URL(request.url);
+
+  // Proxy routes — forward to services via CF tunnel
+  for (const [prefix, originKey] of Object.entries(PROXY_ROUTES)) {
+    if (url.pathname.startsWith(prefix) || url.pathname === prefix.slice(0, -1)) {
+      // Redirect /grafana to /grafana/
+      if (url.pathname === prefix.slice(0, -1)) {
+        return Response.redirect(url.origin + prefix, 302);
+      }
+      return proxyToTunnel(request, env, prefix, originKey);
+    }
+  }
 
   // API routes
   if (url.pathname === "/api/tokens" && request.method === "GET") {
@@ -280,7 +320,8 @@ body{font-family:'Sora',sans-serif;background:var(--bg-0);color:var(--text-0);mi
   <nav class="topbar-nav">
     <a class="topbar-tab active" data-page="dashboard">Dashboard</a>
     <a class="topbar-tab" data-page="tokens">Tokens</a>
-    <a class="topbar-tab" data-page="monitoring">Monitoring</a>
+    <a class="topbar-tab" data-page="grafana">Grafana</a>
+    <a class="topbar-tab" data-page="argocd">ArgoCD</a>
   </nav>
   <div class="topbar-user">
     <div class="avatar">?</div>
@@ -299,7 +340,8 @@ body{font-family:'Sora',sans-serif;background:var(--bg-0);color:var(--text-0);mi
       <div class="panel"><div class="panel-header"><span class="panel-title">Recent Tokens</span><a class="btn btn-sm btn-outline" style="cursor:pointer" data-nav="tokens">View All</a></div><div class="panel-body"><table class="mini-table"><thead><tr><th>Name</th><th>Client ID</th><th>Status</th><th>Created</th></tr></thead><tbody id="dash-tokens-body"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody></table></div></div>
       <div class="panel"><div class="panel-header"><span class="panel-title">Quick Links</span></div><div style="padding:14px 18px;display:flex;flex-direction:column;gap:8px">
         <a href="https://claude-runner.REDACTED_DOMAIN/health" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">🔗</span> Runner Health Check</a>
-        <a href="#" style="color:var(--text-2);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">📊</span> Grafana (coming soon)</a>
+        <a href="/grafana/" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">📊</span> Grafana Dashboards</a>
+        <a href="/argocd/" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">🚀</span> ArgoCD Deployments</a>
         <a href="https://github.com/DigiBugCat" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">🐙</span> GitHub Org</a>
       </div></div>
     </div>
@@ -311,8 +353,11 @@ body{font-family:'Sora',sans-serif;background:var(--bg-0);color:var(--text-0);mi
     </div>
     <table class="full-table"><thead><tr><th>Name</th><th>Client ID</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody id="tokens-body"><tr><td colspan="5" class="empty-state">Loading...</td></tr></tbody></table>
   </div>
-  <div class="page" id="page-monitoring">
-    <div class="monitor-empty"><h3>📊 Grafana Dashboards</h3><p>Monitoring dashboards will be embedded here</p></div>
+  <div class="page" id="page-grafana">
+    <iframe src="/grafana/" style="width:100%;border:none;min-height:calc(100vh - 100px);background:var(--bg-0)"></iframe>
+  </div>
+  <div class="page" id="page-argocd">
+    <iframe src="/argocd/" style="width:100%;border:none;min-height:calc(100vh - 100px);background:var(--bg-0)"></iframe>
   </div>
 </div>
 
