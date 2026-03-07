@@ -41,3 +41,8 @@ variable "allowed_emails" {
   description = "Email addresses allowed to access the portal via Google OAuth"
   type        = list(string)
 }
+
+variable "google_idp_id" {
+  description = "CF Access Google identity provider ID"
+  type        = string
+}

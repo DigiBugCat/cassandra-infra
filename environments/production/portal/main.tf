@@ -30,4 +30,5 @@ module "portal" {
   runner_access_app_id    = var.runner_access_app_id
   runner_access_policy_id = var.runner_access_policy_id
   allowed_emails          = var.allowed_emails
+  google_idp_id           = "REDACTED_IDP_ID"
 }
