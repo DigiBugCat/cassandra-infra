@@ -15,26 +15,20 @@ variable "zone_id" {
   type = string
 }
 
-variable "cf_api_token" {
-  description = "CF API token for Worker to manage service tokens"
+variable "tunnel_secret" {
+  description = "Base64-encoded tunnel secret for the portal tunnel"
   type        = string
   sensitive   = true
-}
-
-variable "runner_access_app_id" {
-  description = "CF Access app ID for the runner"
-  type        = string
-  default     = "REDACTED_ACCESS_APP_ID"
-}
-
-variable "runner_access_policy_id" {
-  description = "CF Access policy ID on the runner app"
-  type        = string
-  default     = "REDACTED_ACCESS_POLICY_ID"
 }
 
 variable "allowed_emails" {
   description = "Emails allowed to access the portal"
   type        = list(string)
   default     = ["REDACTED_EMAIL"]
+}
+
+variable "google_idp_id" {
+  description = "CF Access Google identity provider ID"
+  type        = string
+  default     = "REDACTED_IDP_ID"
 }

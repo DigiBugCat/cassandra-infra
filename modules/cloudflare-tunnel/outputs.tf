@@ -16,11 +16,16 @@ output "hostname" {
 
 output "cf_access_client_id" {
   description = "CF Access service token client ID (send as CF-Access-Client-Id header)"
-  value       = cloudflare_zero_trust_access_service_token.this.client_id
+  value       = var.create_access_app ? cloudflare_zero_trust_access_service_token.this[0].client_id : ""
 }
 
 output "cf_access_client_secret" {
   description = "CF Access service token client secret (send as CF-Access-Client-Secret header)"
-  value       = cloudflare_zero_trust_access_service_token.this.client_secret
+  value       = var.create_access_app ? cloudflare_zero_trust_access_service_token.this[0].client_secret : ""
   sensitive   = true
+}
+
+output "access_app_id" {
+  description = "CF Access application ID"
+  value       = var.create_access_app ? cloudflare_zero_trust_access_application.this[0].id : ""
 }
