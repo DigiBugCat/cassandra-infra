@@ -126,20 +126,23 @@ function extractTokenIds(policy) {
 
 // ── Proxy routes (tunnel-backed services) ──
 
+// keepPath: true = forward full path (service handles sub-path), false = strip prefix
 const PROXY_ROUTES = {
-  "/grafana/": "GRAFANA_ORIGIN",
-  "/argocd/": "ARGOCD_ORIGIN",
+  "/grafana/": { origin: "GRAFANA_ORIGIN", keepPath: true },
+  "/argocd/":  { origin: "ARGOCD_ORIGIN",  keepPath: false },
 };
 
-async function proxyToTunnel(request, env, prefix, originEnvKey) {
+async function proxyToTunnel(request, env, prefix, config) {
   const url = new URL(request.url);
-  const origin = env[originEnvKey];
+  const origin = env[config.origin];
   if (!origin) {
     return new Response("Proxy origin not configured", { status: 502 });
   }
 
-  // Forward the full path (including prefix) — services handle their own sub-path
-  const target = origin + url.pathname + url.search;
+  const path = config.keepPath
+    ? url.pathname                              // /grafana/... → /grafana/...
+    : url.pathname.slice(prefix.length - 1);    // /argocd/... → /...
+  const target = origin + path + url.search;
 
   const headers = new Headers(request.headers);
   headers.set("Host", new URL(origin).hostname);
@@ -158,13 +161,13 @@ async function handleRequest(request, env) {
   const url = new URL(request.url);
 
   // Proxy routes — forward to services via CF tunnel
-  for (const [prefix, originKey] of Object.entries(PROXY_ROUTES)) {
+  for (const [prefix, config] of Object.entries(PROXY_ROUTES)) {
     if (url.pathname.startsWith(prefix) || url.pathname === prefix.slice(0, -1)) {
       // Redirect /grafana to /grafana/
       if (url.pathname === prefix.slice(0, -1)) {
         return Response.redirect(url.origin + prefix, 302);
       }
-      return proxyToTunnel(request, env, prefix, originKey);
+      return proxyToTunnel(request, env, prefix, config);
     }
   }
 
