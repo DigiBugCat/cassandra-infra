@@ -84,7 +84,7 @@ async function updatePolicyTokens(env, tokenIds) {
         name: "Service token access",
         decision: "non_identity",
         precedence: 1,
-        include: [{ service_token: { token_id: tokenIds } }],
+        include: tokenIds.map((id) => ({ service_token: { token_id: id } })),
       }),
     },
   );
