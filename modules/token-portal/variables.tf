@@ -13,7 +13,7 @@ variable "domain" {
 
 variable "subdomain" {
   type    = string
-  default = "keys"
+  default = "portal"
 }
 
 variable "worker_name" {
@@ -21,20 +21,15 @@ variable "worker_name" {
   default = "cassandra-portal"
 }
 
-variable "cf_api_token" {
-  description = "CF API token with Access read/write permissions (stored as Worker secret)"
+variable "runner_url" {
+  description = "Runner orchestrator URL (e.g. https://claude-runner.REDACTED_DOMAIN)"
+  type        = string
+}
+
+variable "runner_admin_key" {
+  description = "Admin API key for the runner's /tenants routes"
   type        = string
   sensitive   = true
-}
-
-variable "runner_access_app_id" {
-  description = "CF Access application ID for the runner (to manage policy)"
-  type        = string
-}
-
-variable "runner_access_policy_id" {
-  description = "CF Access policy ID on the runner app (to add/remove service tokens)"
-  type        = string
 }
 
 variable "allowed_emails" {

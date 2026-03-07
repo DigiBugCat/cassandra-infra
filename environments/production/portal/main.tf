@@ -21,14 +21,13 @@ provider "cloudflare" {
 module "portal" {
   source = "../../../modules/token-portal"
 
-  account_id              = var.cloudflare_account_id
-  zone_id                 = var.zone_id
-  domain                  = "REDACTED_DOMAIN"
-  subdomain               = "portal"
-  worker_name             = "cassandra-portal"
-  cf_api_token            = var.cf_api_token
-  runner_access_app_id    = var.runner_access_app_id
-  runner_access_policy_id = var.runner_access_policy_id
-  allowed_emails          = var.allowed_emails
-  google_idp_id           = "REDACTED_IDP_ID"
+  account_id       = var.cloudflare_account_id
+  zone_id          = var.zone_id
+  domain           = "REDACTED_DOMAIN"
+  subdomain        = "portal"
+  worker_name      = "cassandra-portal"
+  runner_url       = var.runner_url
+  runner_admin_key = var.runner_admin_key
+  allowed_emails   = var.allowed_emails
+  google_idp_id    = "REDACTED_IDP_ID"
 }

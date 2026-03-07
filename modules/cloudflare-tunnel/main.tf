@@ -53,6 +53,13 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "this" {
         hostname = ingress_rule.value.hostname
         service  = ingress_rule.value.service
         path     = ingress_rule.value.path
+
+        dynamic "origin_request" {
+          for_each = ingress_rule.value.no_tls_verify ? [1] : []
+          content {
+            no_tls_verify = true
+          }
+        }
       }
     }
 

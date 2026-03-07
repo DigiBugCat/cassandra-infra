@@ -27,7 +27,8 @@ module "tunnel" {
   subdomain     = "claude-runner"
   tunnel_name   = "cassandra-runner"
   tunnel_secret = var.tunnel_secret
-  origin_url    = "http://localhost:8080"
+  origin_url        = "http://localhost:8080"
+  create_access_app = false
 
   # Internal hostnames for portal Worker to proxy through
   extra_ingress_rules = [
@@ -36,8 +37,9 @@ module "tunnel" {
       service  = "http://grafana.monitoring.svc.cluster.local:3000"
     },
     {
-      hostname = "argocd-int.REDACTED_DOMAIN"
-      service  = "https://argocd-server.argocd.svc.cluster.local:443"
+      hostname      = "argocd-int.REDACTED_DOMAIN"
+      service       = "https://argocd-server.argocd.svc.cluster.local:443"
+      no_tls_verify = true
     },
   ]
 

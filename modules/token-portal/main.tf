@@ -7,7 +7,7 @@ terraform {
   }
 }
 
-# Worker script — serves portal UI + token management API
+# Worker script — serves portal UI + tenant management API
 resource "cloudflare_workers_script" "portal" {
   account_id = var.account_id
   name       = var.worker_name
@@ -15,33 +15,13 @@ resource "cloudflare_workers_script" "portal" {
   module     = true
 
   secret_text_binding {
-    name = "CF_API_TOKEN"
-    text = var.cf_api_token
+    name = "RUNNER_ADMIN_KEY"
+    text = var.runner_admin_key
   }
 
   plain_text_binding {
-    name = "CF_ACCOUNT_ID"
-    text = var.account_id
-  }
-
-  plain_text_binding {
-    name = "RUNNER_ACCESS_APP_ID"
-    text = var.runner_access_app_id
-  }
-
-  plain_text_binding {
-    name = "RUNNER_ACCESS_POLICY_ID"
-    text = var.runner_access_policy_id
-  }
-
-  plain_text_binding {
-    name = "GRAFANA_ORIGIN"
-    text = "https://grafana-int.${var.domain}"
-  }
-
-  plain_text_binding {
-    name = "ARGOCD_ORIGIN"
-    text = "https://argocd-int.${var.domain}"
+    name = "RUNNER_URL"
+    text = var.runner_url
   }
 }
 

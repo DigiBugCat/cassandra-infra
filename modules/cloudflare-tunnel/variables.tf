@@ -38,9 +38,10 @@ variable "origin_url" {
 variable "extra_ingress_rules" {
   description = "Additional ingress rules beyond the primary hostname"
   type = list(object({
-    hostname = string
-    service  = string
-    path     = optional(string)
+    hostname      = string
+    service       = string
+    path          = optional(string)
+    no_tls_verify = optional(bool, false)
   }))
   default = []
 }
