@@ -3,6 +3,7 @@
 // Env vars: CF_API_TOKEN, CF_ACCOUNT_ID, RUNNER_ACCESS_APP_ID, RUNNER_ACCESS_POLICY_ID
 
 const CF_API = "https://api.cloudflare.com/client/v4";
+const TOKEN_PREFIX = "cassandra/";
 
 // ── API Handlers ──
 
@@ -13,10 +14,12 @@ async function listTokens(env) {
   );
   const data = await resp.json();
   if (!data.success) throw new Error(data.errors?.[0]?.message || "Failed to list tokens");
-  return data.result;
+  // Only show tokens created by this portal
+  return data.result.filter((t) => t.name.startsWith(TOKEN_PREFIX));
 }
 
 async function createToken(env, name) {
+  const prefixedName = TOKEN_PREFIX + name;
   // 1. Create the service token
   const resp = await fetch(
     `${CF_API}/accounts/${env.CF_ACCOUNT_ID}/access/service_tokens`,
@@ -26,7 +29,7 @@ async function createToken(env, name) {
         Authorization: `Bearer ${env.CF_API_TOKEN}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, duration: "8760h" }),
+      body: JSON.stringify({ name: prefixedName, duration: "8760h" }),
     },
   );
   const data = await resp.json();
@@ -357,12 +360,12 @@ function renderTokens(tokens){
 
   // Dashboard recent table (top 4)
   const recent=active.slice(0,4);
-  document.getElementById('dash-tokens-body').innerHTML=recent.length?recent.map(t=>'<tr><td style="font-weight:500">'+esc(t.name)+'</td><td><code class="mono">'+t.client_id.slice(0,14)+'...</code></td><td><span class="pill active">● Active</span></td><td style="color:var(--text-3)">'+fmtDate(t.created_at)+'</td></tr>').join(''):'<tr><td colspan="4" class="empty-state">No tokens yet</td></tr>';
+  document.getElementById('dash-tokens-body').innerHTML=recent.length?recent.map(t=>'<tr><td style="font-weight:500">'+esc(t.name.replace('cassandra/',''))+'</td><td><code class="mono">'+t.client_id.slice(0,14)+'...</code></td><td><span class="pill active">● Active</span></td><td style="color:var(--text-3)">'+fmtDate(t.created_at)+'</td></tr>').join(''):'<tr><td colspan="4" class="empty-state">No tokens yet</td></tr>';
 
   // Full tokens table
   const rows=[...active,...revoked].map(t=>{
     const isRevoked=!!t.deleted_at;
-    return '<tr'+(isRevoked?' style="opacity:0.4"':'')+'><td style="font-weight:500">'+esc(t.name)+'</td><td><code class="mono">'+t.client_id.slice(0,14)+'...</code></td><td style="color:var(--text-3)">'+fmtDate(t.created_at)+'</td><td><span class="pill '+(isRevoked?'revoked':'active')+'">'+(isRevoked?'Revoked':'● Active')+'</span></td><td style="text-align:right">'+(isRevoked?'':'<button class="btn-red-sm" onclick="revokeToken(\\''+t.id+'\\',\\''+esc(t.name)+'\\')">Revoke</button>')+'</td></tr>';
+    return '<tr'+(isRevoked?' style="opacity:0.4"':'')+'><td style="font-weight:500">'+esc(t.name.replace('cassandra/',''))+'</td><td><code class="mono">'+t.client_id.slice(0,14)+'...</code></td><td style="color:var(--text-3)">'+fmtDate(t.created_at)+'</td><td><span class="pill '+(isRevoked?'revoked':'active')+'">'+(isRevoked?'Revoked':'● Active')+'</span></td><td style="text-align:right">'+(isRevoked?'':'<button class="btn-red-sm" onclick="revokeToken(\\''+t.id+'\\',\\''+esc(t.name.replace('cassandra/',''))+'\\')">Revoke</button>')+'</td></tr>';
   });
   document.getElementById('tokens-body').innerHTML=rows.length?rows.join(''):'<tr><td colspan="5" class="empty-state">No tokens yet. Create one to get started.</td></tr>';
 }

@@ -24,7 +24,7 @@ module "portal" {
   account_id              = var.cloudflare_account_id
   zone_id                 = var.zone_id
   domain                  = "REDACTED_DOMAIN"
-  subdomain               = "keys"
+  subdomain               = "portal"
   worker_name             = "cassandra-portal"
   cf_api_token            = var.cf_api_token
   runner_access_app_id    = var.runner_access_app_id
