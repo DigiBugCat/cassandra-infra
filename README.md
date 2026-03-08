@@ -11,16 +11,36 @@ Terraform/OpenTofu modules for cloud-managed resources (Cloudflare tunnels, DNS,
 - **`environments/production/runner/`** — CF Tunnel for the Claude Agent Runner
 - **`environments/production/portal/`** — Token management portal at `portal.REDACTED_DOMAIN`
 
-## Usage
+## Deploying
+
+Each environment is a separate Terraform root under `environments/`. Not GitOps — you run `tofu apply` manually.
 
 ```bash
-# Load credentials (git-ignored)
+# 1. Load credentials (git-ignored .env exports TF_VAR_* and AWS_*)
 source .env
 
-cd environments/production/runner
+# 2. Pick an environment
+cd environments/production/runner   # or environments/production/portal
+
+# 3. Init (first time only)
 tofu init -backend-config=production.s3.tfbackend
+
+# 4. Plan and apply
 tofu plan -var-file=production.tfvars
 tofu apply -var-file=production.tfvars
+```
+
+### After applying the runner tunnel
+
+The tunnel token output needs to go into the k8s cluster:
+
+```bash
+# Get the token
+tofu output -raw tunnel_token
+
+# Create the secret (or seal it)
+kubectl create secret generic cloudflare-tunnel --namespace claude-runner \
+  --from-literal=token='<tunnel-token>'
 ```
 
 ## Secrets
