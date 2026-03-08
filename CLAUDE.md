@@ -12,7 +12,9 @@ cassandra-infra/
 │   └── cloudflare-tunnel/       # Reusable: tunnel + DNS + WAF skip
 ├── environments/
 │   └── production/
-│       └── runner/              # CF Tunnel for claude-agent-runner
+│       ├── runner/              # CF Tunnel for claude-agent-runner
+│       ├── portal/              # Portal Worker + Access
+│       └── yt-mcp/              # CF Tunnel + Worker edge + Access for yt-mcp
 └── .gitignore                   # Ignores .terraform/, *.tfstate, *.tfvars
 ```
 
@@ -51,16 +53,16 @@ For CI/CD, these go in GitHub Secrets.
 
 ## Connecting to k8s
 
-After `tofu apply`, the tunnel token output needs to go into `cassandra-k8s`:
+After `tofu apply`, the tunnel token needs to be created as a k8s secret manually:
 
 ```bash
 # Get the tunnel token
 tofu output -raw tunnel_token
 
-# Seal it for k8s
-echo -n '<token>' | kubeseal --raw --namespace claude-runner --name cloudflare-tunnel --from-file=/dev/stdin
-
-# Paste into cassandra-k8s/apps/claude-runner/values-production.yaml
+# Create k8s secret (no sealed secrets — manual kubectl)
+kubectl create secret generic cloudflare-tunnel \
+  --namespace <namespace> \
+  --from-literal=token=<tunnel-token>
 ```
 
 ## Adding More Services
