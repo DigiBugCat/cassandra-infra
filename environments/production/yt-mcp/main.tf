@@ -32,5 +32,22 @@ module "tunnel" {
   skip_waf          = false
 }
 
-# TODO: Add worker-edge and backend-access modules when CF Worker frontend is built.
-# These modules require CF provider v5 and the frontend redesign (WorkOS AuthKit gateway).
+module "worker_edge" {
+  source = "../../../../cassandra-yt-mcp/infra/modules/worker-edge"
+
+  account_id         = var.cloudflare_account_id
+  zone_id            = var.zone_id
+  domain             = var.domain
+  worker_script_name = "cassandra-yt-mcp"
+  worker_subdomain   = var.worker_subdomain
+  enable_waf_skip    = false
+}
+
+module "backend_access" {
+  source = "../../../../cassandra-yt-mcp/infra/modules/backend-access"
+
+  account_id        = var.cloudflare_account_id
+  zone_id           = var.zone_id
+  domain            = var.domain
+  backend_subdomain = var.backend_subdomain
+}

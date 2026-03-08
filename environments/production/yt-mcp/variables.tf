@@ -36,3 +36,9 @@ variable "backend_subdomain" {
   type        = string
   default     = "yt-mcp-api"
 }
+
+variable "worker_subdomain" {
+  description = "Public MCP Worker subdomain"
+  type        = string
+  default     = "yt-mcp"
+}
