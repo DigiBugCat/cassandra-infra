@@ -18,7 +18,6 @@ variable "zone_id" {
 variable "runner_url" {
   description = "Runner orchestrator URL"
   type        = string
-  default     = "https://claude-runner.REDACTED_DOMAIN"
 }
 
 variable "runner_admin_key" {
@@ -30,4 +29,20 @@ variable "runner_admin_key" {
 variable "allowed_emails" {
   description = "Emails allowed to access the portal"
   type        = list(string)
+}
+
+variable "allowed_email_domains" {
+  description = "Email domains allowed to access the portal"
+  type        = list(string)
+  default     = []
+}
+
+variable "domain" {
+  description = "Root domain"
+  type        = string
+}
+
+variable "google_idp_id" {
+  description = "CF Access Google identity provider ID"
+  type        = string
 }

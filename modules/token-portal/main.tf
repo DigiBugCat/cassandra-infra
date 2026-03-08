@@ -23,6 +23,11 @@ resource "cloudflare_workers_script" "portal" {
     name = "RUNNER_URL"
     text = var.runner_url
   }
+
+  plain_text_binding {
+    name = "DOMAIN"
+    text = var.domain
+  }
 }
 
 # Custom domain route for the Worker
@@ -53,6 +58,7 @@ resource "cloudflare_zero_trust_access_policy" "google_email" {
   decision       = "allow"
 
   include {
-    email = var.allowed_emails
+    email        = var.allowed_emails
+    email_domain = var.allowed_email_domains
   }
 }

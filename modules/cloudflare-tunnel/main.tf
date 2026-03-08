@@ -151,6 +151,7 @@ resource "cloudflare_zero_trust_access_policy" "extra" {
   decision       = "allow"
 
   include {
-    email = each.value.emails
+    email        = each.value.emails
+    email_domain = each.value.email_domains
   }
 }

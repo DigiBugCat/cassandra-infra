@@ -23,11 +23,12 @@ module "portal" {
 
   account_id       = var.cloudflare_account_id
   zone_id          = var.zone_id
-  domain           = "REDACTED_DOMAIN"
-  subdomain        = "portal"
-  worker_name      = "cassandra-portal"
-  runner_url       = var.runner_url
-  runner_admin_key = var.runner_admin_key
-  allowed_emails   = var.allowed_emails
-  google_idp_id    = "REDACTED_IDP_ID"
+  domain                = var.domain
+  subdomain             = "portal"
+  worker_name           = "cassandra-portal"
+  runner_url            = var.runner_url
+  runner_admin_key      = var.runner_admin_key
+  allowed_emails        = var.allowed_emails
+  allowed_email_domains = var.allowed_email_domains
+  google_idp_id         = var.google_idp_id
 }

@@ -9,7 +9,7 @@ Terraform/OpenTofu modules for cloud-managed resources (Cloudflare tunnels, DNS,
 - **`modules/cloudflare-tunnel/`** — Reusable module: CF Tunnel + DNS + WAF skip + Access policies
 - **`modules/token-portal/`** — CF Worker for API key management dashboard
 - **`environments/production/runner/`** — CF Tunnel for the Claude Agent Runner
-- **`environments/production/portal/`** — Token management portal at `portal.REDACTED_DOMAIN`
+- **`environments/production/portal/`** — Token management portal
 
 ## Deploying
 

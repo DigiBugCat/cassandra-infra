@@ -25,3 +25,19 @@ variable "allowed_emails" {
   description = "Email addresses allowed to access protected services via CF Access"
   type        = list(string)
 }
+
+variable "allowed_email_domains" {
+  description = "Email domains allowed to access protected services via CF Access"
+  type        = list(string)
+  default     = []
+}
+
+variable "domain" {
+  description = "Root domain"
+  type        = string
+}
+
+variable "google_idp_id" {
+  description = "CF Access Google identity provider ID"
+  type        = string
+}

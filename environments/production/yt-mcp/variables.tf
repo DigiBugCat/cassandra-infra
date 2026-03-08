@@ -28,7 +28,6 @@ variable "tunnel_secret" {
 variable "domain" {
   description = "Service domain"
   type        = string
-  default     = "REDACTED_DOMAIN"
 }
 
 variable "backend_subdomain" {

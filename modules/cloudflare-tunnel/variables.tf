@@ -9,7 +9,7 @@ variable "zone_id" {
 }
 
 variable "domain" {
-  description = "Root domain (e.g. REDACTED_DOMAIN)"
+  description = "Root domain"
   type        = string
 }
 
@@ -67,9 +67,10 @@ variable "skip_waf" {
 variable "access_protected_hostnames" {
   description = "Extra hostnames to protect with CF Access + Google OAuth"
   type = list(object({
-    hostname   = string
-    idp_id     = string
-    emails     = list(string)
+    hostname      = string
+    idp_id        = string
+    emails        = list(string)
+    email_domains = optional(list(string), [])
   }))
   default = []
 }

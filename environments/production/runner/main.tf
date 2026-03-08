@@ -23,7 +23,7 @@ module "tunnel" {
 
   account_id    = var.cloudflare_account_id
   zone_id       = var.zone_id
-  domain        = "REDACTED_DOMAIN"
+  domain        = var.domain
   subdomain     = "claude-runner"
   tunnel_name   = "cassandra-runner"
   tunnel_secret = var.tunnel_secret
@@ -32,11 +32,11 @@ module "tunnel" {
 
   extra_ingress_rules = [
     {
-      hostname = "grafana.REDACTED_DOMAIN"
+      hostname = "grafana.${var.domain}"
       service  = "http://grafana.monitoring.svc.cluster.local:3000"
     },
     {
-      hostname      = "argocd.REDACTED_DOMAIN"
+      hostname      = "argocd.${var.domain}"
       service       = "https://argocd-server.argocd.svc.cluster.local:443"
       no_tls_verify = true
     },
@@ -50,14 +50,16 @@ module "tunnel" {
   # Protect with Google OAuth via CF Access
   access_protected_hostnames = [
     {
-      hostname = "grafana.REDACTED_DOMAIN"
-      idp_id   = "REDACTED_IDP_ID"
-      emails   = var.allowed_emails
+      hostname      = "grafana.${var.domain}"
+      idp_id        = var.google_idp_id
+      emails        = var.allowed_emails
+      email_domains = var.allowed_email_domains
     },
     {
-      hostname = "argocd.REDACTED_DOMAIN"
-      idp_id   = "REDACTED_IDP_ID"
-      emails   = var.allowed_emails
+      hostname      = "argocd.${var.domain}"
+      idp_id        = var.google_idp_id
+      emails        = var.allowed_emails
+      email_domains = var.allowed_email_domains
     },
   ]
 }

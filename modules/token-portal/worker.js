@@ -79,7 +79,8 @@ async function handleRequest(request, env) {
     }
   }
 
-  return new Response(PORTAL_HTML, {
+  const html = PORTAL_HTML.replace('__DOMAIN__', env.DOMAIN || '');
+  return new Response(html, {
     headers: { "Content-Type": "text/html;charset=UTF-8" },
   });
 }
@@ -197,14 +198,14 @@ body{font-family:'Sora',sans-serif;background:var(--bg-0);color:var(--text-0);mi
     <div class="dash-top">
       <div class="metric"><div class="metric-top"><span class="metric-label">API Keys</span><span class="metric-badge neutral" id="dash-token-badge">-</span></div><div class="metric-value" id="dash-token-count">-</div><div class="metric-sub" id="dash-token-sub">loading...</div></div>
       <div class="metric"><div class="metric-top"><span class="metric-label">Health</span><span class="metric-badge up">ok</span></div><div class="metric-value" style="font-size:16px;margin-top:6px">Operational</div><div class="metric-sub">CF Tunnel active</div></div>
-      <div class="metric"><div class="metric-top"><span class="metric-label">Endpoint</span></div><div class="metric-value" style="font-size:12px;margin-top:8px;color:var(--text-1);word-break:break-all">claude-runner.REDACTED_DOMAIN</div><div class="metric-sub">via Cloudflare Tunnel</div></div>
+      <div class="metric"><div class="metric-top"><span class="metric-label">Endpoint</span></div><div class="metric-value" style="font-size:12px;margin-top:8px;color:var(--text-1);word-break:break-all" id="dash-endpoint">-</div><div class="metric-sub">via Cloudflare Tunnel</div></div>
       <div class="metric"><div class="metric-top"><span class="metric-label">Auth</span></div><div class="metric-value" style="font-size:14px;margin-top:6px">API Keys</div><div class="metric-sub">X-API-Key header + ?key= WS</div></div>
     </div>
     <div class="dash-grid">
       <div class="panel"><div class="panel-header"><span class="panel-title">Recent Keys</span><a class="btn btn-sm btn-outline" style="cursor:pointer" data-nav="tokens">View All</a></div><div class="panel-body"><table class="mini-table"><thead><tr><th>Name</th><th>Namespace</th><th>Max Sessions</th><th>Created</th></tr></thead><tbody id="dash-tokens-body"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody></table></div></div>
       <div class="panel"><div class="panel-header"><span class="panel-title">Quick Links</span></div><div style="padding:14px 18px;display:flex;flex-direction:column;gap:8px">
-        <a href="https://grafana.REDACTED_DOMAIN" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">📊</span> Grafana</a>
-        <a href="https://argocd.REDACTED_DOMAIN" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">🚀</span> ArgoCD</a>
+        <a id="link-grafana" href="#" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">📊</span> Grafana</a>
+        <a id="link-argocd" href="#" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">🚀</span> ArgoCD</a>
         <a href="https://github.com/DigiBugCat" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">🐙</span> GitHub Org</a>
       </div></div>
     </div>
@@ -316,6 +317,10 @@ async function deleteTenant(id,name){
     loadTokens();
   }catch(e){alert('Failed: '+e.message)}
 }
+
+// ── Domain-aware links ──
+const DOMAIN='__DOMAIN__';
+if(DOMAIN){document.getElementById('dash-endpoint').textContent='claude-runner.'+DOMAIN;document.getElementById('link-grafana').href='https://grafana.'+DOMAIN;document.getElementById('link-argocd').href='https://argocd.'+DOMAIN}
 
 // ── Init ──
 loadTokens();

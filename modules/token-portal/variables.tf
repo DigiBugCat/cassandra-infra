@@ -7,8 +7,7 @@ variable "zone_id" {
 }
 
 variable "domain" {
-  type    = string
-  default = "REDACTED_DOMAIN"
+  type = string
 }
 
 variable "subdomain" {
@@ -22,7 +21,7 @@ variable "worker_name" {
 }
 
 variable "runner_url" {
-  description = "Runner orchestrator URL (e.g. https://claude-runner.REDACTED_DOMAIN)"
+  description = "Runner orchestrator URL"
   type        = string
 }
 
@@ -35,6 +34,12 @@ variable "runner_admin_key" {
 variable "allowed_emails" {
   description = "Email addresses allowed to access the portal via Google OAuth"
   type        = list(string)
+}
+
+variable "allowed_email_domains" {
+  description = "Email domains allowed to access the portal via Google OAuth (e.g. bluechipcapitalinvestments.com)"
+  type        = list(string)
+  default     = []
 }
 
 variable "google_idp_id" {
