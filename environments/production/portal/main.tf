@@ -30,7 +30,4 @@ module "portal" {
   runner_admin_key = var.runner_admin_key
   allowed_emails   = var.allowed_emails
   google_idp_id    = "REDACTED_IDP_ID"
-
-  internal_access_client_id     = var.internal_access_client_id
-  internal_access_client_secret = var.internal_access_client_secret
 }

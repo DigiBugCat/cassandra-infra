@@ -30,18 +30,4 @@ variable "runner_admin_key" {
 variable "allowed_emails" {
   description = "Emails allowed to access the portal"
   type        = list(string)
-  default     = ["REDACTED_EMAIL"]
-}
-
-variable "internal_access_client_id" {
-  description = "CF Access service token client ID for internal proxy"
-  type        = string
-  default     = ""
-}
-
-variable "internal_access_client_secret" {
-  description = "CF Access service token client secret for internal proxy"
-  type        = string
-  sensitive   = true
-  default     = ""
 }

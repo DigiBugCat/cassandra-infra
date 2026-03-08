@@ -30,27 +30,34 @@ module "tunnel" {
   origin_url        = "http://localhost:8080"
   create_access_app = false
 
-  # Internal hostnames for portal Worker to proxy through
   extra_ingress_rules = [
     {
-      hostname = "grafana-int.REDACTED_DOMAIN"
+      hostname = "grafana.REDACTED_DOMAIN"
       service  = "http://grafana.monitoring.svc.cluster.local:3000"
     },
     {
-      hostname      = "argocd-int.REDACTED_DOMAIN"
+      hostname      = "argocd.REDACTED_DOMAIN"
       service       = "https://argocd-server.argocd.svc.cluster.local:443"
       no_tls_verify = true
     },
   ]
 
   extra_dns_hostnames = [
-    "grafana-int",
-    "argocd-int",
+    "grafana",
+    "argocd",
   ]
 
-  # Lock these behind CF Access — only portal worker can reach them
-  internal_hostnames = [
-    "grafana-int.REDACTED_DOMAIN",
-    "argocd-int.REDACTED_DOMAIN",
+  # Protect with Google OAuth via CF Access
+  access_protected_hostnames = [
+    {
+      hostname = "grafana.REDACTED_DOMAIN"
+      idp_id   = "REDACTED_IDP_ID"
+      emails   = var.allowed_emails
+    },
+    {
+      hostname = "argocd.REDACTED_DOMAIN"
+      idp_id   = "REDACTED_IDP_ID"
+      emails   = var.allowed_emails
+    },
   ]
 }

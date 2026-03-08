@@ -20,3 +20,8 @@ variable "tunnel_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "allowed_emails" {
+  description = "Email addresses allowed to access protected services via CF Access"
+  type        = list(string)
+}

@@ -79,31 +79,9 @@ async function handleRequest(request, env) {
     }
   }
 
-  // Proxy paths for Grafana/ArgoCD
-  if (url.pathname.startsWith("/grafana")) {
-    return proxyToInternal(request, env, "grafana-int", "/grafana");
-  }
-  if (url.pathname.startsWith("/argocd")) {
-    return proxyToInternal(request, env, "argocd-int", "/argocd");
-  }
-
   return new Response(PORTAL_HTML, {
     headers: { "Content-Type": "text/html;charset=UTF-8" },
   });
-}
-
-async function proxyToInternal(request, env, subdomain, prefix) {
-  const url = new URL(request.url);
-  const path = url.pathname.slice(prefix.length) || "/";
-  const target = `https://${subdomain}.REDACTED_DOMAIN${path}${url.search}`;
-  const headers = new Headers(request.headers);
-  headers.delete("host");
-  // Authenticate to CF Access on internal hostnames
-  if (env.INTERNAL_ACCESS_CLIENT_ID) {
-    headers.set("CF-Access-Client-Id", env.INTERNAL_ACCESS_CLIENT_ID);
-    headers.set("CF-Access-Client-Secret", env.INTERNAL_ACCESS_CLIENT_SECRET);
-  }
-  return fetch(target, { method: request.method, headers, body: request.body });
 }
 
 function jsonResponse(data, status = 200) {
@@ -225,8 +203,8 @@ body{font-family:'Sora',sans-serif;background:var(--bg-0);color:var(--text-0);mi
     <div class="dash-grid">
       <div class="panel"><div class="panel-header"><span class="panel-title">Recent Keys</span><a class="btn btn-sm btn-outline" style="cursor:pointer" data-nav="tokens">View All</a></div><div class="panel-body"><table class="mini-table"><thead><tr><th>Name</th><th>Namespace</th><th>Max Sessions</th><th>Created</th></tr></thead><tbody id="dash-tokens-body"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody></table></div></div>
       <div class="panel"><div class="panel-header"><span class="panel-title">Quick Links</span></div><div style="padding:14px 18px;display:flex;flex-direction:column;gap:8px">
-        <a href="/grafana" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">📊</span> Grafana</a>
-        <a href="/argocd" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">🚀</span> ArgoCD</a>
+        <a href="https://grafana.REDACTED_DOMAIN" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">📊</span> Grafana</a>
+        <a href="https://argocd.REDACTED_DOMAIN" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">🚀</span> ArgoCD</a>
         <a href="https://github.com/DigiBugCat" target="_blank" style="color:var(--text-1);font-size:12px;text-decoration:none;display:flex;align-items:center;gap:8px"><span style="font-size:14px">🐙</span> GitHub Org</a>
       </div></div>
     </div>

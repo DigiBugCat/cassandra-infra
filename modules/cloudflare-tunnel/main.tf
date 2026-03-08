@@ -46,7 +46,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "this" {
       service  = var.origin_url
     }
 
-    # Extra ingress rules (portal paths, etc.)
+    # Extra ingress rules
     dynamic "ingress_rule" {
       for_each = var.extra_ingress_rules
       content {
@@ -91,9 +91,8 @@ resource "cloudflare_ruleset" "waf_skip" {
   }
 }
 
-# --- CF Access: protect the tunnel with a service token ---
+# --- CF Access: protect the primary subdomain with a service token ---
 
-# Access application — requires valid service token to reach the origin
 resource "cloudflare_zero_trust_access_application" "this" {
   count                      = var.create_access_app ? 1 : 0
   zone_id                    = var.zone_id
@@ -102,19 +101,15 @@ resource "cloudflare_zero_trust_access_application" "this" {
   type                       = "self_hosted"
   session_duration           = "24h"
   auto_redirect_to_identity  = false
-
-  # Allow WebSocket upgrades (needed for runner WS)
   http_only_cookie_attribute = false
 }
 
-# Service token — the plugin uses this to authenticate
 resource "cloudflare_zero_trust_access_service_token" "this" {
   count      = var.create_access_app ? 1 : 0
   account_id = var.account_id
   name       = "${var.tunnel_name}-service-token"
 }
 
-# Access policy — allow the service token through
 resource "cloudflare_zero_trust_access_policy" "service_token" {
   count          = var.create_access_app ? 1 : 0
   application_id = cloudflare_zero_trust_access_application.this[0].id
@@ -128,42 +123,34 @@ resource "cloudflare_zero_trust_access_policy" "service_token" {
   }
 }
 
-# --- CF Access: protect internal hostnames (e.g. grafana-int, argocd-int) ---
+# --- CF Access: protect extra hostnames with Google OAuth ---
 
 locals {
-  create_internal_access = length(var.internal_hostnames) > 0
+  access_hostnames = { for h in var.access_protected_hostnames : h.hostname => h }
 }
 
-# Access application per internal hostname — blocks all public access
-resource "cloudflare_zero_trust_access_application" "internal" {
-  for_each = toset(var.internal_hostnames)
+resource "cloudflare_zero_trust_access_application" "extra" {
+  for_each = local.access_hostnames
 
   zone_id                   = var.zone_id
-  name                      = each.value
-  domain                    = each.value
+  name                      = each.key
+  domain                    = each.key
   type                      = "self_hosted"
   session_duration          = "24h"
-  auto_redirect_to_identity = false
+  auto_redirect_to_identity = true
+  allowed_idps              = [each.value.idp_id]
 }
 
-# Shared service token for the portal worker to reach internal services
-resource "cloudflare_zero_trust_access_service_token" "internal" {
-  count      = local.create_internal_access ? 1 : 0
-  account_id = var.account_id
-  name       = "${var.tunnel_name}-internal-proxy"
-}
+resource "cloudflare_zero_trust_access_policy" "extra" {
+  for_each = local.access_hostnames
 
-# Allow the service token through each internal Access app
-resource "cloudflare_zero_trust_access_policy" "internal" {
-  for_each = toset(var.internal_hostnames)
-
-  application_id = cloudflare_zero_trust_access_application.internal[each.key].id
+  application_id = cloudflare_zero_trust_access_application.extra[each.key].id
   zone_id        = var.zone_id
-  name           = "Internal proxy access"
+  name           = "Allowed Google users"
   precedence     = 1
-  decision       = "non_identity"
+  decision       = "allow"
 
   include {
-    service_token = [cloudflare_zero_trust_access_service_token.internal[0].id]
+    email = each.value.emails
   }
 }

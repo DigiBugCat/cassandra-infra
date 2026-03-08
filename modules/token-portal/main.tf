@@ -23,16 +23,6 @@ resource "cloudflare_workers_script" "portal" {
     name = "RUNNER_URL"
     text = var.runner_url
   }
-
-  secret_text_binding {
-    name = "INTERNAL_ACCESS_CLIENT_ID"
-    text = var.internal_access_client_id
-  }
-
-  secret_text_binding {
-    name = "INTERNAL_ACCESS_CLIENT_SECRET"
-    text = var.internal_access_client_secret
-  }
 }
 
 # Custom domain route for the Worker

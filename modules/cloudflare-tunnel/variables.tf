@@ -64,8 +64,12 @@ variable "skip_waf" {
   default     = true
 }
 
-variable "internal_hostnames" {
-  description = "Hostnames to protect with CF Access (only reachable via service token)"
-  type        = list(string)
-  default     = []
+variable "access_protected_hostnames" {
+  description = "Extra hostnames to protect with CF Access + Google OAuth"
+  type = list(object({
+    hostname   = string
+    idp_id     = string
+    emails     = list(string)
+  }))
+  default = []
 }
