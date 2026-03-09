@@ -33,7 +33,7 @@ module "tunnel" {
 }
 
 module "worker_edge" {
-  source = "../../../../cassandra-yt-mcp/infra/modules/worker-edge"
+  source = "github.com/DigiBugCat/cassandra-yt-mcp//infra/modules/worker-edge?ref=main"
 
   account_id         = var.cloudflare_account_id
   zone_id            = var.zone_id
@@ -44,7 +44,7 @@ module "worker_edge" {
 }
 
 module "backend_access" {
-  source = "../../../../cassandra-yt-mcp/infra/modules/backend-access"
+  source = "github.com/DigiBugCat/cassandra-yt-mcp//infra/modules/backend-access?ref=main"
 
   account_id        = var.cloudflare_account_id
   zone_id           = var.zone_id
