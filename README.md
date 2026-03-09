@@ -7,9 +7,10 @@ Terraform/OpenTofu modules for cloud-managed resources (Cloudflare tunnels, DNS,
 ## What's Here
 
 - **`modules/cloudflare-tunnel/`** — Reusable module: CF Tunnel + DNS + WAF skip + Access policies
-- **`modules/token-portal/`** — CF Worker for API key management dashboard
-- **`environments/production/runner/`** — CF Tunnel for the Claude Agent Runner
-- **`environments/production/portal/`** — Token management portal
+- **`environments/production/runner/`** — CF Tunnel for the Claude Agent Runner plus grafana, argocd, and vm-push ingress
+- **`environments/production/portal/`** — Portal Worker edge and Access
+- **`environments/production/observability/`** — CF Access service token for Worker metrics push
+- **`environments/production/yt-mcp/`** — yt-mcp backend tunnel, Worker edge, and backend Access
 
 ## Deploying
 
@@ -28,6 +29,24 @@ tofu init -backend-config=production.s3.tfbackend
 # 4. Plan and apply
 tofu plan -var-file=production.tfvars
 tofu apply -var-file=production.tfvars
+```
+
+## Verification
+
+Use the repo test harness from this subrepo:
+
+```bash
+./scripts/test-plan.sh static
+./scripts/test-plan.sh integration
+./scripts/test-plan.sh full
+```
+
+Or from the stack root:
+
+```bash
+./scripts/subrepo-test-plan.sh run cassandra-infra static
+./scripts/subrepo-test-plan.sh run cassandra-infra integration
+./scripts/subrepo-test-plan.sh run cassandra-infra full
 ```
 
 ### After applying the runner tunnel
