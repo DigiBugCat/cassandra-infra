@@ -2,76 +2,76 @@
 
 ## What This Is
 
-Terraform/OpenTofu for cloud-managed resources (Cloudflare, WorkOS, etc.). State stored in R2. No secrets in git — sensitive values come from `TF_VAR_*` environment variables.
+Terraform/OpenTofu for all Cloudflare resources across the Cassandra stack. Single consolidated state manages everything. Modules live in their service repos (services own their infra definitions), this repo composes them.
 
 ## Repo Structure
 
 ```
 cassandra-infra/
 ├── modules/
-│   └── cloudflare-tunnel/       # Reusable: tunnel + DNS + WAF skip
+│   └── cloudflare-tunnel/           # Reusable: tunnel + DNS + WAF skip + Access
 ├── environments/
 │   └── production/
-│       ├── runner/              # CF Tunnel for claude-agent-runner (+ grafana, argocd, vm-push ingress)
-│       ├── portal/              # Portal Worker + Access
-│       ├── yt-mcp/              # CF Tunnel + Worker edge + Access for yt-mcp
-│       └── observability/       # CF Access service token for vm-push metrics endpoint
-└── .gitignore                   # Ignores .terraform/, *.tfstate, *.tfvars
+│       ├── main.tf                  # All services composed here
+│       ├── variables.tf             # Shared variables (CF creds, domain, access)
+│       ├── outputs.tf               # All service outputs
+│       └── production.s3.tfbackend  # R2 state backend config
+└── .gitignore
 ```
+
+## Module Sources (local paths via cassandra-stack submodules)
+
+| Module | Source repo | Resources |
+|--------|------------|-----------|
+| `runner_tunnel` | `cassandra-infra/modules/cloudflare-tunnel` | CF Tunnel, DNS, WAF skip, Access apps (grafana, argocd) |
+| `portal_edge` | `cassandra-portal/infra/modules/portal-edge` | KV (MCP_KEYS), D1 (PORTAL_DB), DNS, CF Access |
+| `yt_mcp_tunnel` | `cassandra-infra/modules/cloudflare-tunnel` | CF Tunnel for yt-mcp backend |
+| `yt_mcp_worker_edge` | `cassandra-yt-mcp/infra/modules/worker-edge` | DNS, KV (OAuth state) |
+| `yt_mcp_backend_access` | `cassandra-yt-mcp/infra/modules/backend-access` | CF Access app + service token |
+| `metrics_push` | `cassandra-observability/infra/modules/metrics-push` | CF Access app + service token for vm-push |
 
 ## Usage
 
 ```bash
-source .env   # loads TF_VAR_* and AWS_* (for R2 state backend)
+source /path/to/cassandra-stack/env/infra.env  # loads TF_VAR_* and AWS_*
 
-cd environments/production/runner
+cd environments/production
 tofu init -backend-config=production.s3.tfbackend
 tofu plan
 tofu apply
 ```
 
+One `tofu apply` manages all services. Module changes in service repos are picked up automatically (local paths).
+
 ## Secrets
 
-All sensitive values via environment variables. The `.env` file (git-ignored) exports:
+All sensitive values via environment variables from `cassandra-stack/env/infra.env` (git-ignored):
 
-```bash
-# Cloudflare (Global API Key — needed for DNS, WAF, tunnels)
-export TF_VAR_cloudflare_api_key="..."
-export TF_VAR_cloudflare_email="..."
-export TF_VAR_cloudflare_account_id="..."
-export TF_VAR_zone_id="..."
+- `TF_VAR_cloudflare_api_key` — Global API Key
+- `TF_VAR_cloudflare_email` — Account email
+- `TF_VAR_cloudflare_account_id` — Account ID
+- `TF_VAR_zone_id` — Zone ID
+- `TF_VAR_tunnel_secret` — Shared tunnel secret
+- `TF_VAR_domain` — Root domain
+- `TF_VAR_allowed_emails` — CF Access allowed emails
+- `TF_VAR_allowed_email_domains` — CF Access allowed domains
+- `TF_VAR_google_idp_id` — CF Access Google IdP ID
+- R2 state backend credentials (AWS-compatible key pair)
 
-# Tunnel secret (generate once: openssl rand -base64 32)
-export TF_VAR_tunnel_secret="..."
+## Outputs
 
-# CF Access
-export TF_VAR_domain="..."
-export TF_VAR_allowed_emails='["..."]'
-export TF_VAR_allowed_email_domains='["..."]'
-export TF_VAR_google_idp_id="..."
+After `tofu apply`, use `tofu output <name>` to get IDs for wrangler.jsonc and GitHub Actions secrets:
 
-# R2 state backend
-export AWS_ACCESS_KEY_ID="..."
-export AWS_SECRET_ACCESS_KEY="..."
-export AWS_REGION="auto"
-```
+- `portal_mcp_keys_kv_id` — MCP_KEYS KV namespace ID (shared)
+- `portal_db_id` — D1 database ID for portal
+- `runner_tunnel_token` — k8s secret for runner tunnel
+- `yt_mcp_tunnel_token` — k8s secret for yt-mcp tunnel
+- `yt_mcp_oauth_kv_id` — KV namespace ID for yt-mcp OAuth
+- `vm_push_client_id` / `vm_push_client_secret` — metrics push service token
 
-All applies are manual from the local machine. No CI/CD for Terraform.
+## Adding a New Service
 
-## Connecting to k8s
-
-After `tofu apply`, the tunnel token needs to be created as a k8s secret manually:
-
-```bash
-# Get the tunnel token
-tofu output -raw tunnel_token
-
-# Create k8s secret (no sealed secrets — manual kubectl)
-kubectl create secret generic cloudflare-tunnel \
-  --namespace <namespace> \
-  --from-literal=token=<tunnel-token>
-```
-
-## Adding More Services
-
-As other services move here (memory, scheduler, MCP gateway), add them under `environments/production/<service>/`. Reuse modules where possible.
+1. Create `infra/modules/<name>/` in the service repo with Terraform resources
+2. Add a `module` block in `environments/production/main.tf` sourcing it via local path
+3. Add outputs in `environments/production/outputs.tf`
+4. `tofu init -upgrade && tofu apply`

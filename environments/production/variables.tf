@@ -1,3 +1,5 @@
+# ── Cloudflare credentials ──
+
 variable "cloudflare_api_key" {
   type      = string
   sensitive = true
@@ -15,6 +17,13 @@ variable "zone_id" {
   type = string
 }
 
+# ── Shared across services ──
+
+variable "domain" {
+  description = "Root domain"
+  type        = string
+}
+
 variable "tunnel_secret" {
   description = "Base64-encoded tunnel secret — generate with: openssl rand -base64 32"
   type        = string
@@ -30,11 +39,6 @@ variable "allowed_email_domains" {
   description = "Email domains allowed to access protected services via CF Access"
   type        = list(string)
   default     = []
-}
-
-variable "domain" {
-  description = "Root domain"
-  type        = string
 }
 
 variable "google_idp_id" {
