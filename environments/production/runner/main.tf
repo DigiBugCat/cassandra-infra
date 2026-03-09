@@ -40,11 +40,16 @@ module "tunnel" {
       service       = "https://argocd-server.argocd.svc.cluster.local:443"
       no_tls_verify = true
     },
+    {
+      hostname = "vm-push.${var.domain}"
+      service  = "http://vmsingle-vm-k8s-stack.monitoring.svc:8429"
+    },
   ]
 
   extra_dns_hostnames = [
     "grafana",
     "argocd",
+    "vm-push",
   ]
 
   # Protect with Google OAuth via CF Access
