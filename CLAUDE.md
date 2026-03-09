@@ -12,9 +12,10 @@ cassandra-infra/
 │   └── cloudflare-tunnel/       # Reusable: tunnel + DNS + WAF skip
 ├── environments/
 │   └── production/
-│       ├── runner/              # CF Tunnel for claude-agent-runner
+│       ├── runner/              # CF Tunnel for claude-agent-runner (+ grafana, argocd, vm-push ingress)
 │       ├── portal/              # Portal Worker + Access
-│       └── yt-mcp/              # CF Tunnel + Worker edge + Access for yt-mcp
+│       ├── yt-mcp/              # CF Tunnel + Worker edge + Access for yt-mcp
+│       └── observability/       # CF Access service token for vm-push metrics endpoint
 └── .gitignore                   # Ignores .terraform/, *.tfstate, *.tfvars
 ```
 
@@ -38,10 +39,16 @@ All sensitive values via environment variables. The `.env` file (git-ignored) ex
 export TF_VAR_cloudflare_api_key="..."
 export TF_VAR_cloudflare_email="..."
 export TF_VAR_cloudflare_account_id="..."
-export TF_VAR_zone_id="9daf7ca045b2695b4297dfe130c02764"
+export TF_VAR_zone_id="..."
 
 # Tunnel secret (generate once: openssl rand -base64 32)
 export TF_VAR_tunnel_secret="..."
+
+# CF Access
+export TF_VAR_domain="..."
+export TF_VAR_allowed_emails='["..."]'
+export TF_VAR_allowed_email_domains='["..."]'
+export TF_VAR_google_idp_id="..."
 
 # R2 state backend
 export AWS_ACCESS_KEY_ID="..."
@@ -49,7 +56,7 @@ export AWS_SECRET_ACCESS_KEY="..."
 export AWS_REGION="auto"
 ```
 
-For CI/CD, these go in GitHub Secrets.
+All applies are manual from the local machine. No CI/CD for Terraform.
 
 ## Connecting to k8s
 
