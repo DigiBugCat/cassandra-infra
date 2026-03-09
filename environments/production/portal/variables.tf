@@ -15,15 +15,9 @@ variable "zone_id" {
   type = string
 }
 
-variable "runner_url" {
-  description = "Runner orchestrator URL"
+variable "domain" {
+  description = "Root domain"
   type        = string
-}
-
-variable "runner_admin_key" {
-  description = "Admin API key for runner tenant management"
-  type        = string
-  sensitive   = true
 }
 
 variable "allowed_emails" {
@@ -35,11 +29,6 @@ variable "allowed_email_domains" {
   description = "Email domains allowed to access the portal"
   type        = list(string)
   default     = []
-}
-
-variable "domain" {
-  description = "Root domain"
-  type        = string
 }
 
 variable "google_idp_id" {
