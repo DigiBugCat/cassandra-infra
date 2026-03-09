@@ -2,21 +2,24 @@
 
 ## What This Is
 
-Terraform/OpenTofu for all Cloudflare resources across the Cassandra stack. Single consolidated state manages everything. Modules live in their service repos (services own their infra definitions), this repo composes them.
+Terraform/OpenTofu for all Cloudflare resources across the Cassandra stack. Single root module manages everything. Services own their infra definitions (modules in their repos), this repo composes them.
 
 ## Repo Structure
 
 ```
 cassandra-infra/
+├── main.tf                # terraform block + provider
+├── variables.tf           # shared variables (CF creds, domain, access)
+├── runner.tf              # runner tunnel + DNS + Access + outputs
+├── portal.tf              # portal KV + D1 + DNS + Access + outputs
+├── yt-mcp.tf              # yt-mcp tunnel + worker + backend access + outputs
+├── observability.tf       # metrics push access + outputs
 ├── modules/
-│   └── cloudflare-tunnel/           # Reusable: tunnel + DNS + WAF skip + Access
-├── environments/
-│   └── production/
-│       ├── main.tf                  # All services composed here
-│       ├── variables.tf             # Shared variables (CF creds, domain, access)
-│       ├── outputs.tf               # All service outputs
-│       └── production.s3.tfbackend  # R2 state backend config
-└── .gitignore
+│   └── cloudflare-tunnel/ # reusable: tunnel + DNS + WAF skip + Access
+└── environments/
+    └── production/
+        ├── production.s3.tfbackend          # R2 state backend (gitignored)
+        └── production.s3.tfbackend.example  # template with placeholders
 ```
 
 ## Module Sources (local paths via cassandra-stack submodules)
@@ -35,8 +38,7 @@ cassandra-infra/
 ```bash
 source /path/to/cassandra-stack/env/infra.env  # loads TF_VAR_* and AWS_*
 
-cd environments/production
-tofu init -backend-config=production.s3.tfbackend
+tofu init -backend-config=environments/production/production.s3.tfbackend
 tofu plan
 tofu apply
 ```
@@ -72,6 +74,5 @@ After `tofu apply`, use `tofu output <name>` to get IDs for wrangler.jsonc and G
 ## Adding a New Service
 
 1. Create `infra/modules/<name>/` in the service repo with Terraform resources
-2. Add a `module` block in `environments/production/main.tf` sourcing it via local path
-3. Add outputs in `environments/production/outputs.tf`
-4. `tofu init -upgrade && tofu apply`
+2. Create `<service>.tf` in this repo with module block (local path source) + outputs
+3. `tofu init -upgrade && tofu apply`
