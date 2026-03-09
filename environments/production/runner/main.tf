@@ -42,7 +42,7 @@ module "tunnel" {
     },
     {
       hostname = "vm-push.${var.domain}"
-      service  = "http://vmsingle-vm-k8s-stack.monitoring.svc:8429"
+      service  = "http://vmsingle-vm-k8s-stack-victoria-metrics-k8s-stack.monitoring.svc:8428"
     },
   ]
 
