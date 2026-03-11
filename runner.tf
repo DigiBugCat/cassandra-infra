@@ -1,4 +1,4 @@
-# ── Runner (CF Tunnel + DNS + Access for grafana/argocd/vm-push) ──
+# ── Single CF Tunnel — routes all k8s services through one cloudflared pod ──
 
 module "runner_tunnel" {
   source = "./modules/cloudflare-tunnel"
@@ -26,12 +26,22 @@ module "runner_tunnel" {
       hostname = "vm-push.${var.domain}"
       service  = "http://vmsingle-vm-k8s-stack-victoria-metrics-k8s-stack.monitoring.svc:8428"
     },
+    {
+      hostname = "ci.${var.domain}"
+      service  = "http://woodpecker-server.woodpecker.svc.cluster.local:80"
+    },
+    {
+      hostname = "yt-mcp-api.${var.domain}"
+      service  = "http://cassandra-yt-mcp.cassandra-yt-mcp.svc.cluster.local:3000"
+    },
   ]
 
   extra_dns_hostnames = [
     "grafana",
     "argocd",
     "vm-push",
+    "ci",
+    "yt-mcp-api",
   ]
 
   access_protected_hostnames = [
@@ -47,11 +57,17 @@ module "runner_tunnel" {
       emails        = var.allowed_emails
       email_domains = var.allowed_email_domains
     },
+    {
+      hostname      = "ci.${var.domain}"
+      idp_id        = var.google_idp_id
+      emails        = var.allowed_emails
+      email_domains = var.allowed_email_domains
+    },
   ]
 }
 
-output "runner_tunnel_token" {
-  description = "Runner tunnel token — create as k8s secret"
+output "tunnel_token" {
+  description = "Tunnel token — single tunnel for all k8s services"
   value       = module.runner_tunnel.tunnel_token
   sensitive   = true
 }

@@ -26,9 +26,8 @@ cassandra-infra/
 
 | Module | Source repo | Resources |
 |--------|------------|-----------|
-| `runner_tunnel` | `cassandra-infra/modules/cloudflare-tunnel` | CF Tunnel, DNS, WAF skip, Access apps (grafana, argocd) |
+| `runner_tunnel` | `cassandra-infra/modules/cloudflare-tunnel` | Single CF Tunnel for all k8s services (runner, grafana, argocd, vm-push, ci, yt-mcp-api) |
 | `portal_edge` | `cassandra-portal/infra/modules/portal-edge` | KV (MCP_KEYS), D1 (PORTAL_DB), DNS, CF Access |
-| `yt_mcp_tunnel` | `cassandra-infra/modules/cloudflare-tunnel` | CF Tunnel for yt-mcp backend |
 | `yt_mcp_worker_edge` | `cassandra-yt-mcp/infra/modules/worker-edge` | DNS, KV (OAuth state) |
 | `yt_mcp_backend_access` | `cassandra-yt-mcp/infra/modules/backend-access` | CF Access app + service token |
 | `metrics_push` | `cassandra-observability/infra/modules/metrics-push` | CF Access app + service token for vm-push |
@@ -62,12 +61,11 @@ All sensitive values via environment variables from `cassandra-stack/env/infra.e
 
 ## Outputs
 
-After `tofu apply`, use `tofu output <name>` to get IDs for wrangler.jsonc and GitHub Actions secrets:
+After `tofu apply`, use `tofu output <name>` to get IDs for wrangler.jsonc and Woodpecker secrets:
 
 - `portal_mcp_keys_kv_id` — MCP_KEYS KV namespace ID (shared)
 - `portal_db_id` — D1 database ID for portal
-- `runner_tunnel_token` — k8s secret for runner tunnel
-- `yt_mcp_tunnel_token` — k8s secret for yt-mcp tunnel
+- `tunnel_token` — k8s secret for the single CF tunnel (used by runner cloudflared sidecar)
 - `yt_mcp_oauth_kv_id` — KV namespace ID for yt-mcp OAuth
 - `vm_push_client_id` / `vm_push_client_secret` — metrics push service token
 

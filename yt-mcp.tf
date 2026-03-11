@@ -1,18 +1,5 @@
-# ── YT-MCP (Tunnel + Worker edge + Backend Access) ──
-
-module "yt_mcp_tunnel" {
-  source = "./modules/cloudflare-tunnel"
-
-  account_id        = var.cloudflare_account_id
-  zone_id           = var.zone_id
-  domain            = var.domain
-  subdomain         = "yt-mcp-api"
-  tunnel_name       = "cassandra-yt-mcp"
-  tunnel_secret     = var.tunnel_secret
-  origin_url        = "http://localhost:3000"
-  create_access_app = false
-  skip_waf          = false
-}
+# ── YT-MCP (Worker edge + Backend Access) ──
+# Tunnel ingress for yt-mcp-api is handled by the single runner tunnel in runner.tf.
 
 module "yt_mcp_worker_edge" {
   source = "../cassandra-yt-mcp/infra/modules/worker-edge"
@@ -32,16 +19,6 @@ module "yt_mcp_backend_access" {
   zone_id           = var.zone_id
   domain            = var.domain
   backend_subdomain = "yt-mcp-api"
-}
-
-output "yt_mcp_tunnel_token" {
-  description = "YT-MCP backend tunnel token"
-  value       = module.yt_mcp_tunnel.tunnel_token
-  sensitive   = true
-}
-
-output "yt_mcp_backend_hostname" {
-  value = module.yt_mcp_tunnel.hostname
 }
 
 output "yt_mcp_worker_hostname" {
