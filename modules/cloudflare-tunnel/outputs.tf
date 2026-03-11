@@ -29,3 +29,8 @@ output "access_app_id" {
   description = "CF Access application ID"
   value       = var.create_access_app ? cloudflare_zero_trust_access_application.this[0].id : ""
 }
+
+output "extra_access_app_ids" {
+  description = "Map of hostname → CF Access application ID for extra protected hostnames"
+  value       = { for k, v in cloudflare_zero_trust_access_application.extra : k => v.id }
+}

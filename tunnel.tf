@@ -66,6 +66,36 @@ module "runner_tunnel" {
   ]
 }
 
+# ── Woodpecker CI API — service token for CLI/API access through CF Access ──
+
+resource "cloudflare_zero_trust_access_service_token" "woodpecker_ci" {
+  account_id = var.cloudflare_account_id
+  name       = "woodpecker-ci-api-token"
+}
+
+resource "cloudflare_zero_trust_access_policy" "woodpecker_ci_service_token" {
+  application_id = module.runner_tunnel.extra_access_app_ids["ci.${var.domain}"]
+  zone_id        = var.zone_id
+  name           = "Woodpecker CI API service token"
+  precedence     = 2
+  decision       = "non_identity"
+
+  include {
+    service_token = [cloudflare_zero_trust_access_service_token.woodpecker_ci.id]
+  }
+}
+
+output "woodpecker_ci_client_id" {
+  description = "CF Access service token client ID for Woodpecker CI API"
+  value       = cloudflare_zero_trust_access_service_token.woodpecker_ci.client_id
+}
+
+output "woodpecker_ci_client_secret" {
+  description = "CF Access service token client secret for Woodpecker CI API"
+  value       = cloudflare_zero_trust_access_service_token.woodpecker_ci.client_secret
+  sensitive   = true
+}
+
 output "tunnel_token" {
   description = "Tunnel token — single tunnel for all k8s services"
   value       = module.runner_tunnel.tunnel_token
