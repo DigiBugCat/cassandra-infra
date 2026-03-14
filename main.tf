@@ -6,6 +6,10 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 4.0"
     }
+    unifi = {
+      source  = "paultyng/unifi"
+      version = "~> 0.41"
+    }
   }
 
   backend "s3" {
@@ -16,4 +20,11 @@ terraform {
 provider "cloudflare" {
   api_key = var.cloudflare_api_key
   email   = var.cloudflare_email
+}
+
+provider "unifi" {
+  username       = var.unifi_username
+  password       = var.unifi_password
+  api_url        = var.unifi_api_url
+  allow_insecure = true # self-signed cert on UDM
 }
