@@ -6,10 +6,6 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 4.0"
     }
-    unifi = {
-      source  = "paultyng/unifi"
-      version = "~> 0.41"
-    }
   }
 
   backend "s3" {
@@ -22,9 +18,20 @@ provider "cloudflare" {
   email   = var.cloudflare_email
 }
 
-provider "unifi" {
-  username       = var.unifi_username
-  password       = var.unifi_password
-  api_url        = var.unifi_api_url
-  allow_insecure = true # self-signed cert on UDM
+# ── WorkOS OIDC Identity Provider (shared by all CF Access apps) ──
+
+resource "cloudflare_zero_trust_access_identity_provider" "workos" {
+  account_id = var.cloudflare_account_id
+  name       = "WorkOS"
+  type       = "oidc"
+
+  config {
+    client_id     = var.workos_connect_client_id
+    client_secret = var.workos_connect_client_secret
+    auth_url      = "https://${var.workos_authkit_domain}/oauth2/authorize"
+    token_url     = "https://${var.workos_authkit_domain}/oauth2/token"
+    certs_url     = "https://${var.workos_authkit_domain}/oauth2/jwks"
+    scopes        = ["openid", "profile", "email"]
+  }
 }
+

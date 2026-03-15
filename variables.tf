@@ -41,39 +41,18 @@ variable "allowed_email_domains" {
   default     = []
 }
 
-variable "google_idp_id" {
-  description = "CF Access Google identity provider ID"
+variable "workos_authkit_domain" {
+  description = "WorkOS AuthKit domain (e.g. your-slug.authkit.app)"
   type        = string
 }
 
-# ── UniFi credentials ──
-
-variable "unifi_username" {
-  type      = string
-  sensitive = true
-}
-
-variable "unifi_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "unifi_api_url" {
-  type = string
-}
-
-variable "unifi_network_name" {
-  description = "Name of the UniFi network for DHCP reservations"
+variable "workos_connect_client_id" {
+  description = "WorkOS Connect OAuth Application client ID for CF Access"
   type        = string
 }
 
-# ── UniFi node inventory ──
-
-variable "unifi_nodes" {
-  description = "Map of node name → {mac, ip, note} for DHCP reservations"
-  type = map(object({
-    mac  = string
-    ip   = string
-    note = optional(string, "")
-  }))
+variable "workos_connect_client_secret" {
+  description = "WorkOS Connect OAuth Application client secret for CF Access"
+  type        = string
+  sensitive   = true
 }

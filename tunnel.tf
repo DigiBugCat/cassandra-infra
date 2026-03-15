@@ -52,13 +52,13 @@ module "runner_tunnel" {
   access_protected_hostnames = [
     {
       hostname      = "grafana.${var.domain}"
-      idp_id        = var.google_idp_id
+      idp_id        = cloudflare_zero_trust_access_identity_provider.workos.id
       emails        = var.allowed_emails
       email_domains = var.allowed_email_domains
     },
     {
       hostname      = "argocd.${var.domain}"
-      idp_id        = var.google_idp_id
+      idp_id        = cloudflare_zero_trust_access_identity_provider.workos.id
       emails        = var.allowed_emails
       email_domains = var.allowed_email_domains
     },

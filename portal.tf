@@ -10,7 +10,7 @@ module "portal_edge" {
   worker_script_name    = "cassandra-portal"
   allowed_emails        = var.allowed_emails
   allowed_email_domains = var.allowed_email_domains
-  google_idp_id         = var.google_idp_id
+  idp_id                = cloudflare_zero_trust_access_identity_provider.workos.id
 }
 
 output "portal_url" {
