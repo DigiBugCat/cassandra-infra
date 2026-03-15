@@ -10,10 +10,12 @@ Terraform/OpenTofu for all Cloudflare resources across the Cassandra stack. Sing
 cassandra-infra/
 ├── main.tf                # terraform block + provider
 ├── variables.tf           # shared variables (CF creds, domain, access)
-├── runner.tf              # runner tunnel + DNS + Access + outputs
+├── tunnel.tf              # single CF Tunnel for all k8s services + DNS + outputs
 ├── portal.tf              # portal KV + D1 + DNS + Access + outputs
-├── yt-mcp.tf              # yt-mcp tunnel + worker + backend access + outputs
+├── yt-mcp.tf              # yt-mcp worker edge + backend access + outputs
+├── acl.tf                 # ACL worker edge (KV, DNS) + outputs
 ├── observability.tf       # metrics push access + outputs
+├── unifi.tf               # UniFi DHCP reservations for k3s nodes
 ├── modules/
 │   └── cloudflare-tunnel/ # reusable: tunnel + DNS + WAF skip + Access
 └── environments/
@@ -26,10 +28,11 @@ cassandra-infra/
 
 | Module | Source repo | Resources |
 |--------|------------|-----------|
-| `runner_tunnel` | `cassandra-infra/modules/cloudflare-tunnel` | Single CF Tunnel for all k8s services (runner, grafana, argocd, vm-push, ci, yt-mcp-api) |
+| `runner_tunnel` | `cassandra-infra/modules/cloudflare-tunnel` | Single CF Tunnel for all k8s services (runner, grafana, argocd, vm-push, ci, yt-mcp-api, yt-mcp-mcp) |
 | `portal_edge` | `cassandra-portal/infra/modules/portal-edge` | KV (MCP_KEYS), D1 (PORTAL_DB), DNS, CF Access |
 | `yt_mcp_worker_edge` | `cassandra-yt-mcp/infra/modules/worker-edge` | DNS, KV (OAuth state) |
 | `yt_mcp_backend_access` | `cassandra-yt-mcp/infra/modules/backend-access` | CF Access app + service token |
+| `acl_edge` | `cassandra-auth/infra/modules/acl-edge` | KV (ACL_CREDENTIALS), DNS |
 | `metrics_push` | `cassandra-observability/infra/modules/metrics-push` | CF Access app + service token for vm-push |
 
 ## Usage

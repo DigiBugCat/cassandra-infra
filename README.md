@@ -9,10 +9,13 @@ This repo is stack-scoped rather than standalone: the root module intentionally 
 ## What's Here
 
 - **`main.tf`** — Terraform block + provider
-- **`runner.tf`** — CF Tunnel for the runner plus grafana, argocd, and vm-push ingress
+- **`variables.tf`** — Shared variables (CF creds, domain, access)
+- **`tunnel.tf`** — Single CF Tunnel for all k8s services (runner, grafana, argocd, vm-push, ci, yt-mcp-api, yt-mcp-mcp)
 - **`portal.tf`** — Portal Worker edge (KV, D1, DNS, CF Access)
-- **`yt-mcp.tf`** — yt-mcp backend tunnel, Worker edge, and backend Access
+- **`yt-mcp.tf`** — yt-mcp Worker edge (DNS, KV) + backend Access
+- **`acl.tf`** — ACL Worker edge (KV, DNS)
 - **`observability.tf`** — CF Access service token for Worker metrics push
+- **`unifi.tf`** — UniFi DHCP reservations for k3s nodes
 - **`modules/cloudflare-tunnel/`** — Reusable module: CF Tunnel + DNS + WAF skip + Access policies
 - **`environments/`** — Backend config examples and local tfvars (gitignored)
 

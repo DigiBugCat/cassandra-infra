@@ -34,6 +34,10 @@ module "runner_tunnel" {
       hostname = "yt-mcp-api.${var.domain}"
       service  = "http://cassandra-yt-mcp.cassandra-yt-mcp.svc.cluster.local:3000"
     },
+    {
+      hostname = "yt-mcp-mcp.${var.domain}"
+      service  = "http://cassandra-yt-mcp.cassandra-yt-mcp.svc.cluster.local:3003"
+    },
   ]
 
   extra_dns_hostnames = [
@@ -42,6 +46,7 @@ module "runner_tunnel" {
     "vm-push",
     "ci",
     "yt-mcp-api",
+    "yt-mcp-mcp",
   ]
 
   access_protected_hostnames = [
