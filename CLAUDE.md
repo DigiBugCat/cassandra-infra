@@ -32,7 +32,7 @@ cassandra-infra/
 | `portal_edge` | `cassandra-portal/infra/modules/portal-edge` | KV (MCP_KEYS), D1 (PORTAL_DB), DNS, CF Access |
 | `yt_mcp_worker_edge` | `cassandra-yt-mcp/infra/modules/worker-edge` | DNS, KV (OAuth state) |
 | `yt_mcp_backend_access` | `cassandra-yt-mcp/infra/modules/backend-access` | CF Access app + service token |
-| `acl_edge` | `cassandra-auth/infra/modules/acl-edge` | KV (ACL_CREDENTIALS), DNS |
+| `auth_worker` | `cassandra-auth/infra/modules/auth-worker` | KV (AUTH_CREDENTIALS), DNS |
 | `metrics_push` | `cassandra-observability/infra/modules/metrics-push` | CF Access app + service token for vm-push |
 
 ## Usage
