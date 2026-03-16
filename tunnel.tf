@@ -9,7 +9,7 @@ module "runner_tunnel" {
   subdomain         = "claude-runner"
   tunnel_name       = "cassandra-runner"
   tunnel_secret     = var.tunnel_secret
-  origin_url        = "http://localhost:8080"
+  origin_url        = "http://claude-orchestrator.claude-runner.svc.cluster.local:8080"
   create_access_app = false
 
   extra_ingress_rules = [
