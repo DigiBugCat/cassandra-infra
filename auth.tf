@@ -6,7 +6,7 @@ module "auth_worker" {
   account_id         = var.cloudflare_account_id
   zone_id            = var.zone_id
   domain             = var.domain
-  worker_script_name = "cassandra-acl"  # Keep old name to preserve KV namespace
+  worker_script_name = "cassandra-auth"
   worker_subdomain   = "auth"
 }
 
