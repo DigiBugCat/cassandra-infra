@@ -38,6 +38,10 @@ module "runner_tunnel" {
       hostname = "yt-mcp-mcp.${var.domain}"
       service  = "http://cassandra-yt-mcp.cassandra-yt-mcp.svc.cluster.local:3003"
     },
+    {
+      hostname = "fmp.${var.domain}"
+      service  = "http://cassandra-fmp.cassandra-fmp.svc.cluster.local:3003"
+    },
   ]
 
   extra_dns_hostnames = [
@@ -47,6 +51,7 @@ module "runner_tunnel" {
     "ci",
     "yt-mcp-api",
     "yt-mcp-mcp",
+    "fmp",
   ]
 
   access_protected_hostnames = [
