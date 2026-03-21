@@ -16,7 +16,7 @@ module "runner_tunnel" {
     # ── Platform services ──
     {
       hostname = "portal.${var.domain}"
-      service  = "http://cassandra-portal.production.svc.cluster.local:8080"
+      service  = "http://portal.production.svc.cluster.local:8080"
     },
     # ── Infra services ──
     {
@@ -39,19 +39,19 @@ module "runner_tunnel" {
     # ── MCP services ──
     {
       hostname = "yt-mcp-api.${var.domain}"
-      service  = "http://cassandra-yt-mcp.production.svc.cluster.local:3000"
+      service  = "http://yt-mcp.production.svc.cluster.local:3000"
     },
     {
       hostname = "yt-mcp-mcp.${var.domain}"
-      service  = "http://cassandra-yt-mcp.production.svc.cluster.local:3003"
+      service  = "http://yt-mcp.production.svc.cluster.local:3003"
     },
     {
       hostname = "fmp.${var.domain}"
-      service  = "http://cassandra-fmp.production.svc.cluster.local:3003"
+      service  = "http://fmp.production.svc.cluster.local:3003"
     },
     {
       hostname = "discord-mcp.${var.domain}"
-      service  = "http://cassandra-discord-mcp.production.svc.cluster.local:3003"
+      service  = "http://discord-mcp.production.svc.cluster.local:3003"
     },
   ]
 
