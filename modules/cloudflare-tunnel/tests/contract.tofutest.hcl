@@ -17,7 +17,7 @@ run "default_contract" {
     extra_ingress_rules = [
       {
         hostname      = "grafana.example.com"
-        service       = "http://grafana.monitoring.svc.cluster.local:3000"
+        service       = "http://grafana.infra.svc.cluster.local:3000"
         no_tls_verify = true
       }
     ]
